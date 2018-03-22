@@ -9,7 +9,9 @@ Image feature extraction involves several steps - dimensionality reduction, feat
 
 ## Models 
 Feature Extraction: PCA, LDA
+
 Feature Classification: SVM, KNN
+
 Black Box Models: CNN, Deep CNN
 
 ## Data Set
