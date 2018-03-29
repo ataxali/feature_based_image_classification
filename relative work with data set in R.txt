@@ -1,0 +1,37 @@
+## R image classifcation with MNIST and CIFAR-10 
+https://cran.r-project.org/web/packages/KernelKnn/vignettes/image_classification_using_MNIST_CIFAR_data.html
+
+** Notes: 
+
+1. The work above for the dataset is performed in white-black scale(gray 0- 255), but should be applicable
+
+** Question: 
+
+1. should we perform data reduction on R/G/B respectively or jointly ,i.e.
+    list[3] *row[1024(32*32pixels per color)] *col[60000(6000units*10 categories) ]
+    or the latter 
+    row[3*1024] * col[60000]
+   ** personally think the latter one is easier and makes more sense, havent search if there paper done in both ways.
+
+## HOG(Histogram of oriented gradients) 
+
+https://en.wikipedia.org/wiki/Histogram_of_oriented_gradients
+
+** Notes:
+
+1. Seems to be a commom and popular approach for image processing, is wildly use in multiple reasech works
+
+** Question: 
+
+1. Should we use HOG to replace/ in addition to the current existing dimension reduction/ feature selection. 
+
+##CNN (Convolutional Neural Network) in R using (Microsoft Cognitive Toolkit (CNTK)) cnn 
+
+https://microsoft.github.io/CNTK-R/articles/cifar10_example.html
+
+## ALternative for LDA => DLDA (Deep Linear Discriminant Analysis)
+
+Paper: (conference paper at ICLR 2016)
+https://arxiv.org/pdf/1511.04707v5.pdf
+
+** Notes: using LDA extracted feature and feed into deep neural net, hence Deep LDA. 
