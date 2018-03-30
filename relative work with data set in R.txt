@@ -34,6 +34,9 @@ https://microsoft.github.io/CNTK-R/articles/cifar10_example.html
 Paper: (conference paper at ICLR 2016)
 https://arxiv.org/pdf/1511.04707v5.pdf
 
+
+##OpenImageR package, for image processing and HOG_apply(extracting HOG feature with Rcpp) 
+https://cran.r-project.org/web/packages/OpenImageR/OpenImageR.pdf
 #Resource for VGG in tensorflow
 http://www.cs.toronto.edu/~frossard/post/vgg16/
 
