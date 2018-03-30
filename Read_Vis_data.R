@@ -8,15 +8,30 @@
 #
 # (See http://www.cs.toronto.edu/~kriz/cifar.html)
 setwd("C:/Users/user/Desktop/Umich Stat/2018 Winter/STAT 503/Project")
-
+library(tidyverse)
+library(MASS)
 #==================#
-## code reference: #
+#  code reference: #
 #==================#
 ##the code below is from the URL:
 ##https://stackoverflow.com/questions/32113942/importing-cifar-10-data-set-to-r
-labels <- readr::read_table2("./cifar-10-batches-bin/batches.meta.txt")
+
+
+
+#==================#
+#  Data processing #
+#==================#
+
+#===============#
+# Training data #
+#===============#
+
+labels <- readr::read_table2("./cifar-10-batches-bin/batches.meta.txt",col_names = "Class")[-11,]
 images.rgb <- list()
-images.lab <- list()
+train_class =  list()
+train_R = list()
+train_G = list()
+train_B = list()
 num.images = 10000 # Set to 10000 to retrieve all images per file to memory
 
 # Cycle through all 5 binary files
@@ -29,13 +44,94 @@ for (f in 1:5) {
     b <- as.integer(readBin(to.read, raw(), size=1, n=1024, endian="big"))
     index <- num.images * (f-1) + i
     images.rgb[[index]] = data.frame(r, g, b)
-    images.lab[[index]] = l+1
+    train_R[[index]] = r
+    train_G[[index]] = g
+    train_B[[index]] = b
+    train_class[[index]] = l+1
   }
   close(to.read)
   remove(l,r,g,b,f,i,index, to.read)
 }
 
+train_R = 
+  train_R %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+train_G = 
+  train_G %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+train_B = 
+  train_B %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+train_class = 
+  train_class %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+colnames(train_class)="Class"
+
+colnames(train_R) = paste0("R",1:1024)
+colnames(train_G) = paste0("G",1:1024)
+colnames(train_B) = paste0("B",1:1024)
+
+save(train_R,train_G,train_B,train_class, file = "./Data/train_cifar_10.RData")
+
+#===========#
+# Test data #
+#===========#
+
+test_class =  list()
+test_R = list()
+test_G = list()
+test_B = list()
+num.images = 10000
+
+test.read <- "cifar-10-batches-bin/test_batch.bin"
+for(i in 1:num.images) {
+  l <- readBin(test.read, integer(), size=1, n=1, endian="big")
+  r <- as.integer(readBin(test.read, raw(), size=1, n=1024, endian="big"))
+  g <- as.integer(readBin(test.read, raw(), size=1, n=1024, endian="big"))
+  b <- as.integer(readBin(test.read, raw(), size=1, n=1024, endian="big"))
+  index <- num.images * (1-1) + i
+  test_R[[index]] = r
+  test_G[[index]] = g
+  test_B[[index]] = b
+  test_class[[index]] = l+1
+}
+remove(l,r,g,b,i,index, test.read)
+
+test_R = 
+  test_R %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+test_G = 
+  test_G %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+test_B = 
+  test_B %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+test_class = 
+  test_class %>%
+  do.call(cbind,.) %>%
+  t() %>% as.tibble()
+colnames(test_class)="Class"
+
+colnames(test_R) = paste0("R",1:1024)
+colnames(test_G) = paste0("G",1:1024)
+colnames(test_B) = paste0("B",1:1024)
+
+save(test_R,test_G,test_B,test_class, file = "./Data/test_cifar_10.RData")
+
 # function to run sanity check on photos & labels import
+
+
+#==============#
+#  Draw Images #
+#==============#
+
 drawImage <- function(index) {
   # Testing the parsing: Convert each color layer into a matrix,
   # combine into an rgb object, and display as a plot

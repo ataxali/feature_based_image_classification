@@ -27,7 +27,6 @@ Strata_srs_cv_index = function(class_index = train_class, K=10){
     as.data.frame() %>%
     dplyr::mutate(class_index= sort(class_index[[1]])) 
   
-  folds = list()
   
   make_fold_with_cv_index = function(x){
     training = 
