@@ -7,7 +7,7 @@
 # NOT broken into rows, so need to be careful with "size" and "n"
 #
 # (See http://www.cs.toronto.edu/~kriz/cifar.html)
-setwd("C:/Users/user/Desktop/Umich Stat/2018 Winter/STAT 503/Project")
+setwd("C:\\Users\\amant\\Desktop\\Winter2018\\Stats503\\final_project\\trunk")
 library(tidyverse)
 library(MASS)
 #==================#
