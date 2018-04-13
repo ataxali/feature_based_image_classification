@@ -10,3 +10,16 @@ for(i in 1:5){
     gabor_filter[,(i-1)*8+j] =  as.vector(gabor_fn(i,theta[j],1,1,1,32))   
   }
 }
+
+apply filter: 
+use "convolve" 
+
+ex: 
+
+convolve(x,gabor_filter[,1])
+x is targeted data, should be "vector"
+
+convole(as.vector(x),gabor_filter[,1])
+
+
+The output is a vector
