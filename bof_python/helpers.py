@@ -64,18 +64,22 @@ class ImageHelpers:
 
         hog_image_rescaled = exposure.rescale_intensity(hog_img,
                                                        in_range=(0, 10))
+        hog_image_rescaled[hog_image_rescaled == 1] = 0
         ax3.axis('off')
         ax3.imshow(hog_image_rescaled, cmap=plt.cm.gray)
         ax3.set_title('Histogram of Oriented Gradients')
         plt.show()
 
         descriptors = np.array(descriptors)
+        descriptors[descriptors >= 0.99] = 0
         non_zero_descriptors = np.nonzero(descriptors)
         non_zero_descriptors = np.dstack((non_zero_descriptors, descriptors[non_zero_descriptors]))
         non_zero_descriptors = np.squeeze(non_zero_descriptors, axis=0)
 
         descriptors = non_zero_descriptors
-        keypoints = non_zero_descriptors.shape[0]
+        # descriptors = descriptors[np.nonzero(descriptors)]
+        keypoints = descriptors.shape[0]
+        # descriptors = np.resize(descriptors, (keypoints, 1))
 
         return [keypoints, descriptors]
 
@@ -87,7 +91,7 @@ class BOVHelpers:
         self.kmeans_ret = None
         self.descriptor_vstack = None
         self.mega_histogram = None
-        self.clf = SVC()
+        self.clf = SVC(degree=5)
 
     def cluster(self):
         """

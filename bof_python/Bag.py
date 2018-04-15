@@ -7,12 +7,16 @@ from helpers import *
 from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
+from sklearn.metrics import confusion_matrix
 
+HOG_PCA_COMPONENTS = 100
+TEST_IMAGE_LIMIT = 50
+TRAIN_IMAGE_LIMIT = 100
+VOCAB_SIZE = 200
 
 class_hog_vectors = dict()
 class_hog_means = dict()
 class_hog_vars = dict()
-HOG_PCA_COMPONENTS = 100
 class_hog_eig_vectors = dict()
 
 
@@ -41,7 +45,7 @@ class BOV:
 
         # read file. prepare file lists.
         self.images, self.trainImageCount = self.file_helper.getFiles(
-            self.train_path, limit=50)
+            self.train_path, limit=TRAIN_IMAGE_LIMIT)
         #self.images, self.trainImageCount = mnist.get_data("training", 1000)
         # extract SIFT Features from each image
         label_count = 0
@@ -175,11 +179,12 @@ class BOV:
         """
 
         self.testImages, self.testImageCount = self.file_helper.getFiles(
-            self.test_path, limit=50)
+            self.test_path, limit=TEST_IMAGE_LIMIT)
         #self.testImages, self.testImageCount = mnist.get_data("testing", 100)
 
         predictions = []
         true_values = []
+        y_preds = []
 
         for word, imlist in self.testImages.items():
             print("processing ", word)
@@ -197,6 +202,7 @@ class BOV:
                     'object_name': self.name_dict[str(int(cl[0]))]
                 })
                 true_values.append(word)
+                y_preds.append(self.name_dict[str(int(cl[0]))])
 
         # print(predictions)
         incorrect_classifications = 0
@@ -217,6 +223,8 @@ class BOV:
         print("Correct classifications", correct_classifications)
         print("Incorrect classifications", incorrect_classifications)
         print("Err pct", incorrect_classifications/(correct_classifications + incorrect_classifications))
+        print(self.name_dict)
+        print(confusion_matrix(true_values, y_preds, labels=['ball', 'car', 'money', 'motorbike', 'person']))
 
 
     def print_vars(self):
@@ -236,7 +244,7 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
     print(args)
 
-    bov = BOV(no_clusters=200)
+    bov = BOV(no_clusters=VOCAB_SIZE)
 
     # set training paths
     bov.train_path = args['train_path']
