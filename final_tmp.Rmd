@@ -1,8 +1,18 @@
 ---
-title: "503_report_knn"
+title: "503 Final Tmp"
 author: ""
-date: "13 April 2018"
-output: pdf_document
+header-includes:
+- \usepackage{graphicx} 
+- \usepackage{fancyhdr}
+- \pagestyle{fancy}
+- \fancyhead[LE,RO]{Final Project}
+- \fancyfoot[CO,CE]{Group 9}
+- \fancyfoot[LE,RO]{\thepage}
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  pdf_document: 
+    fig_height: 4
+    fig_width: 8
 ---
 
 ```{r setup, include=FALSE}
@@ -10,7 +20,7 @@ output: pdf_document
 ####################################################
 # Course : STAT 503
 # File: Final Project
-# Author: Yung-Chun LEE, Aman Taxali
+# Author: Yung-Chun LEE, Aman Taxali, Anuj 
 ####################################################
 
 ############
@@ -29,6 +39,7 @@ setwd("C:/Users/user/Desktop/Umich Stat/2018 Winter/STAT 503/Project")
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+\newpage
 
 ##Problem of Interest 
 
@@ -36,7 +47,7 @@ Images have played a great part of our life after dat storage become cheaper and
 
 ###Data Exploration Challenge with Image data/ Difference with tabular data
 
-*Color digital images are made of pixels, and pixels are made of combinations of primary colors represented by a series of code. A channel in this context is the grayscale image of the same size as a color image, made of just one of these primary colors. For instance, an image from a standard digital camera will have a red, green and blue channel.* 
+*https://en.wikipedia.org/wiki/Channel_(digital_image).* 
 
 ####Data Structure
 
@@ -44,17 +55,28 @@ A color digital image can be decompose into an 3-dimensional array with each a $
 
 ####Properties
 
-+ Ordered/ Not exchangable
+The following figure displays variation of letter A, which in essence is still regonizable for human, be in the matrix representation is quiet different. 
 
-Even the data storage is tabular, but the columns are not exchangable, and pixels cells are highly correlated with each other.
+\begin{center}
+\includegraphics[width=\linewidth]{Image/A_comparison.jpg}
+\end{center}
 
-+ Scale 
++ Ordered/ Not exchangable:
+Even the data storage is tabular, but the columns are not exchangable, and pixels cells are highly correlated with its neighbors.
+Another problem arised when comverting vector back to original image, we need to be careful of the dimensions otherwise the image will be distorted.
 
-+ Rotation
++ Rotation:
+Rotaion of an image may cause classifier to fail if not handle carefully, casue machine takes the matrix/vector representation of an image and and mention before, pixel are highly correlated and not exchangable. 
 
-+ Noise 
++ Noise:
+If the object is blend-in/ merge into the background capturing the main object image will be challenging.  
 
++ Scale: 
+Size of the image grows in a non-linear rate, which results in the high dimensionality of the image. As an example, an image with 30x40 pixels ($\mathcal{R}^{1200}$) contains 1/100 entries compared with 300x400 pixels image ($\mathcal{R}^{120000}$).
 
+\begin{center}
+\includegraphics[width=0.7\linewidth]{Image/size_comparison.jpg}
+\end{center}
 
 
 
@@ -114,8 +136,9 @@ $$
 \hat{Y_{Test}} = \Bigg\{N \in \{Class~of~||M_i||_{p}\}; ||M_i||_{p} =min\Big\{ ||M_1||_{p},\cdots,||M_m||_{p} \Big\} \Bigg\}, \text{where }p \text{ denotes } L_p \text {distance}
 $$
 
-####Pseudo Code
-
+\begin{center}
+\includegraphics[width=\linewidth]{Image/algo_nn.PNG}
+\end{center}
 
 
 ####Data experiement
@@ -133,22 +156,18 @@ source('./class_heatmap.R')
 #load plot data 
 load("./Data/nn_low_res.RData")
 
-##description of figure
-mnist_desc =substitute (paste(italic("Notes:") ,
-                              "Err denotes the misclassified count frequency."))
 #plot images
 
-L1_mnist_plt = class_heatmap(L1_df,"Using L1-norm")
-L2_mnist_plt = class_heatmap(L2_df,"Using L2-norm")
+L1_mnist_plt = class_heatmap(L1_df)
+L2_mnist_plt = class_heatmap(L2_df)
 grid.arrange(L1_mnist_plt,L2_mnist_plt,ncol=2,
-             top = textGrob(substitute(paste("Heatmap of classification matrix with ",
-                                             italic('Low-resolution'), " images")),
+             top = textGrob("Classification Matrix for Low-Resolution Images",
                             x = 0, # starts far left
                             y = 0.5, # experiment with
                                      # vertical placement
                             just = "left", # left-aligned,
                             gp = gpar(fontsize = 16)),
-             bottom = textGrob(  mnist_desc,
+             bottom = textGrob(  "",
                                  x = 0, # starts far left
                                  y = 0.5, # experiment with
                                      # vertical placement
@@ -156,64 +175,220 @@ grid.arrange(L1_mnist_plt,L2_mnist_plt,ncol=2,
                                  gp = gpar(fontsize = 10)))
 ```
 
-####L1 vs. L2.
+```{r,eval=F}
+#load plot data 
+load("./Result/nn_high_res.RData")
 
+cat = c("ball","car","money","motorbike","person")
+r = rbind(c(32,11,0,7,0),
+          c(10,25,8,0,7),
+          c(26,0,12,8,4),
+          c(18,0,22,9,1),
+          c(8,3,2,27,10))
+
+colnames(r) = cat
+rownames(r) = cat
+tmp_1 = ftable(r)
+class_heatmap_ftable(tmp_1)
+
+L1_h_df = tmp_1
+
+r = cbind(c(28,12,10,0),
+          c(10,32,8,0),
+          c(27,11,10,2),
+          c(12,0,30,8))
+
+
+
+
+
+#plot images
+
+L1_h_plt = class_heatmap_ftable(L1_h_df,"Using L1-norm")
+L2_h_plt = class_heatmap_ftable(L2_h_df,"Using L2-norm")
+grid.arrange(L1_h_plt,L2_h_plt,ncol=2,
+             top = textGrob("Classification Matrix for High-Resolution Images",
+                            x = 0, # starts far left
+                            y = 0.5, # experiment with
+                                     # vertical placement
+                            just = "left", # left-aligned,
+                            gp = gpar(fontsize = 16)),
+             bottom = textGrob(  "",
+                                 x = 0, # starts far left
+                                 y = 0.5, # experiment with
+                                     # vertical placement
+                                 just = "left", # left-aligned,
+                                 gp = gpar(fontsize = 10)))
+```
+
+
+####L1 vs. L2.
+As we can seen that $L_2-norm$ takes more information from the matrix as it penalizes among all the differences instead of the algorithm for $L_1-norm$ which only takes one of all columns. 
+
+####High- vc. Low- resolution images
+The main difference between low- and high- resolution images are the information contained the the image vector. Results from applying naïve classifier to both high- and low- resolution images are what we expected to be quiet different. Even we only have fewer classes in the high-resolution set, the accuracy drop drastically. 
+
+**Notes**:
+Worth mentioning that this algorithm requires *ALL* images from train and test set to be consistant in width and height, ortherwise it will fail becasue the nature of the algorithm involves matrix element-wise substraction and hence calculate matrix-norm.
 
 ##Introducing Feature Descriptors
 
-**TODO: Describe what a feature detector is. **
 
-###Histogram of Gradient (HOG)
+Feature descriptors are algorithms motivated by recent works in computer vision and image processing that take an image and output a set of numerical feature vectors that encode *interesting* information from the image. This set of numerical feature vectors can be used to define a unique "fingerprint" for any given image. Recent works have uncovered ways of extracting information from images that is invariant under image transforamtions; this means that the same set of features are identified from an image if it is tranformed in ways such as scale, rotation, shift etc. 
 
-**TODO: Explain histogram of gradient**
-**TODO: Discuss HOG on low- and high- resolution data set.**
+###Histogram of Oriented Gradient (HOG)
 
-###PCA of Histogtam of gradient(HOG) 
+The histogram of oriented gradient was proposed as a feature descriptor for object detection by Dalal and Triggs in 2005. For simplicity of presentation, HOG is considered on gray-scale images throughout our report.
 
-**TODO: Explain model**
-**TODO: pseudo code** 
-**TODO: low/high res classification matrix**
-**TODO: Interpret result**
+Let $D$ be an image, we would like to describe using HOG. We divide $D$ into non-overlapping sub-images called cells, denoted $C$. Next, we form image blocks, denoted $B$, by combining cell sub-images. An important difference between cells and blocks is that cells are non-overlapping, while blocks can overlap. Starting with the cells definded in the upper-left corner of the image, blocks are formed in a slidding window format per row, with the last block consisting of the cells in the bottom-right corner.
+
+The gradient $\nabla D$ of image $D$ is vector field over the image's domain $(x,y)$ , where $(x,y)$ is a pixel location in the image. This can be approximated by partial derivative along the $x$ and $y$ directions as, 
+$$
+\begin{split}
+\nabla D &\approx
+\begin{bmatrix}
+\frac{D(x+\delta,y)-D(x-\delta,y)}{2 \delta} \\
+\frac{D(x,y+\delta)-D(x,y-\delta)}{2 \delta} \\
+\end{bmatrix}
+\end{split}
+$$
+
+The gradient provides two important pieces of information about the image's local stucture. $||\nabla D ||$ tells us the magnitude of the local gradient and $\Theta = tan^{-1}\Big( \frac{\nabla_{y}D}{\nabla_{x}D} \Big)$ gives us the angle of the gradient.
+
+The vector $h_i$, called the HOG of block $B_i$, is calculated by computing the $\big( \Theta, ||\nabla D ||\big )$ for each pixel in the block. Downsampling by binning the values of $\Theta$ is used to reduce the gradients per block. Finally, the HOG of image $D$ is defined by stacking all $h_i$ in order. Therefore, the HOG feature descriptor for an image can be represented as a 2-dimensional vector.
+
+The images below display image features identified by HOG for high and low resolution images.
+
+\begin{center}
+\includegraphics[width=\linewidth]{Image/hog_demo.jpg}
+\end{center}
+
+
+###PCA of Histogram of gradient(HOG) 
+
+
+We explore a multi-class classifier based on principle component analysis (PCA) of histogram of oriented gradient (HOG) for accurate and fast image classification. 
+
+Supposed we are given $K$ classes of labeled images. For each image $x^{(j)}_{i}$ in class $j$ where $i= \{1, \cdots, n_j  \}$ and $j=\{ 0,\cdots, K-1\}$, we compute the HOG vector $h^{(j)}_{i}$. For each class $j$, the HOG vectors are arranged in a feature matrix $H^{(j)} = \big[ h^{(j)}_1 \, h^{(j)}_2 \, \cdots h^{(j)}_{n_j}\big]$. 
+
+For each class $j$, we compute the mean vector and covariance matrix 
+
+$$
+\begin{split}
+\bar{h_j} &= \frac{1}{n_j} \sum_{i=1}^{n_j} h^{(j)}_{i} \\
+\\
+C_j &=\frac{1}{n_j-1} \sum_{i=1}^{n_j} \big(h^{(j)}_{i} - \bar{h_j}\big) {\big(h^{(j)}_{i} - \bar{h_j}\big)}^T
+\end{split}
+$$
+
+and then perform eigen-decomposition of $C_j$ as
+
+$$
+C_j = T_j \Lambda_j T^T_j
+$$
+
+and construct matrix $T^{(j)}_P = \big[ t^{(j)}_1 \, t^{(j)}_2 \, \cdots t^{(j)}_{P}\big]$ which contains $P$ eigenvectors of $C_j$ that are associated with the $P$ largest eigenvalues. As a dimension reduction technique, the $K$ image classes can be though of as being well represented by the reduced image set $\{\bar{h_j},  T^{(j)}_P\}$. $T^{(j)}_P$ defines a $P$ dimensional subspace representing the variation of the individual images in class $j$ from $\bar{h_j}$.
+
+To classify a test image $x$, we first compute HOG features $h$ of $x$. Then for each class $j$, we project the image to the $P$-dimensional subspace by computing $z_j = T^{(j)T}_P \big(h - \bar{h_j}\big)$. Next, we reconstruct the image by mapping it back to its original HOG dimensions by inverse transforming as $\hat{h_j} = T^{(j)}_Pz_j + \bar{h_j}$. Finally, we compute the euclidean distance $E_j = ||h-\hat{h_j} ||_{2}$ for $j=\{ 0,\cdots, K-1\}$ and classify $x$ to the class $j^*$ that minimizes $\Big\{E_j, j=0,\cdots, K-1 \Big\}$.
+
+
+\begin{center}
+\includegraphics[width=\linewidth]{Image/hog_pca_psuedo_combined.jpg}
+\end{center}
+
+As seen in the classification matrices above, the PCA of HOG method is able to achieve an impressive 89.2% classification accuracy for low-resolution images. However this method does not fare as well in classifying high-resolution images; it is only able to achieve 68% classification accuracy for high-resolution images.  
+
+```{r fig.height=8, fig.width=4,eval=F}
+load("./Result/hog_pca_ftable.RData")
+
+hog_pca_l_plt = class_heatmap_ftable(low_res_hog_pca,"Low-resolution images")
+hog_pca_h_plt = class_heatmap_ftable(high_res_hog_pca,"High-resolution images")
+
+grid.arrange(hog_pca_l_plt,hog_pca_h_plt,ncol=1,
+             top = textGrob("Heatmap of classification matrix",
+                            x = 0, # starts far left
+                            y = 0.5, # experiment with
+                                     # vertical placement
+                            just = "left", # left-aligned,
+                            gp = gpar(fontsize = 16)),
+             bottom = textGrob(  "",
+                                 x = 0, # starts far left
+                                 y = 0.5, # experiment with
+                                     # vertical placement
+                                 just = "left", # left-aligned,
+                                 gp = gpar(fontsize = 10)))
+```
+
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/tbl_hog_pca.PNG}
+\end{center}
+
+A notable feature of the PCA of HOG model is its fast classification performance. The table above shows that on a 2-core Intel-i7 processor, this model is able to classify low-resolution images in approximately 10 milliseconds. This benchmark is important because the broadcasting standard for videos is 24 frames per second. This means that each frame (or image) in a video is on screen for 42 milliseconds. With PCA of HOG, we should be able to perform real-time streaming low-resolution video classification. 
+
+Another important interpretation of the results above is that the performance of classification in high-resolution images does not improve as we reduce the effect of dimensionality reduction (or increase the number of principal components). This result informs us of the limitation of HOG as a feature descriptor for high-resolution images. This is why, in the following models proposed in this report, we will try to improve HOG with spstial locality information.
 
 ###Bag of Feature 
 
-**TODO: Flow chart**
+Bag-of-features model (BoF) for image processing is an adaptation of the bag-of-words model from text mining. In this approach, image features are treated analogously to words, and images to documents. The complete space of image features defines the visual vocabulary, and each image is represented as a set of words (features) from this vocabulary. The flowchart below displays the steps in the BoF model.  
 
-![Bag Of Features: Flow Chart](Image/bof_2.jpg)
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/bof_2.jpg}
+\end{center}
 
 *Image credit (BOF Flow Chart): Image adapted from Arénaire project, Laboratoire de l'Informatique du Parallélisme(LIP)*
 
-**TODO: Explain model using flow chart**
 
-+ **Step (A)**: 
++ **Step (A): Compute descriptors**
 
-+ **Step (B)**: 
+Feature detection and description algorithms must be applied to each image to extract local image features. These features are represented as numerical vectors. 
 
-+ **Step (C)**: 
++ **Step (B): Find cluster and frequencies** 
 
-+ **Step (D)**: 
+The numerical vector representation of a local image features are converted to "codewords" (analogous to words in text documents). These "codewords" are collected to produce a visual vocabulary (analogous to a word dictionary). One simple method of converting feature vectors to the visual vocabulary is by performing K-means clustering over all local image features. The learned cluster centers define the "codewords" and the number of clusters defines the vocabulary size. 
 
-**TODO: Pseudo code**
+At this stage, each image can be represented as a combination of "codewords" from our visual vocabulary. It is worth noting that an image may contain multiple instances of the same "codeword", which is why each image is typically described as a histogram of "codewords".
+ 
++ **Step (C):  Classification**
 
-###BoF with HOG
+A classification decision boundry can be computed using the set-of-codewords representation of training images for each class. A variety of high-dimensional supervised learning models can be used for this step (such as SVM and AdaBoost). 
+
+To classify a test image, feature extraction is conducted as in step A. These test image features are mapped to the nearest "codewords" in our visual vocabulary. In the case where K-means is used to originally define the visual dictionary, this nearest mapping is simply minimizing the Euclidean Distance between each test feature vector and "codewords". Now, the test image can be represented as a collection of "codewords" and the classifier from step C can be used to predict the label of the test image. 
+
+
+###Bag-of-Features with SIFT
+
+####Scale-Invariant Feature Transform (SIFT)
+
+Scale-Invariant Feature Transform (SIFT) as a computer vision algorithm that was published by Lowe in 1999. This descriptor detects and describes a collection of local features in images that are invariant to image transformations of scaling, rotation, illumination changes, and geometric distortion.
+
+The features highlighted by SIFT are computed by finding the local minimums and maximums of the difference of gaussians at various scales. The direction of local gradient, computed with respect to neighboring pixels in Gaussian-blurred image, is used to assign one or more dominant orientation to each feature. 
+
+SIFT is a popular feature detection and description algorithm, and we propose using it in the first step of the bag-of-features model. Next, for the clustering step to construct the visual vocabulary using the SIFT identified features, we suggest K-means for its simplicity. Finally, for the multi-class classification of image feature vectors, we employ SVM with the radial basis function kernel. 
+
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/sift_demo.jpg}
+\end{center}
+
+The classification matrices below show that the combination of a BoF and SIFT is able to achieve an impressive 92% classification accuracy for high-resolution images. However, this model does not fare well in classifying low-resolution images; it is only able to achive 63% classification accuracy for low-resolution images.
+
+\begin{center}
+\includegraphics[width=\linewidth]{Image/sift_classification.jpg}
+\end{center}
+
+The table below summarizes the performace of the BoF and SIFT models over a range of visual vocabulary sizes. The classification accuracy of this model increases as the vocabulary sizes increases. However, these gains only contiue up to a certain point, after which the model's performance stabilizes. Also, previously we mentioned the 42 millisecond classification-time threshold for real-time streaming video classification. As seen below, with a few technical refinements, the Bof and SIFT model should be able to classify high-resolution video in real-time. 
+
+
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/tbl_sift.PNG}
+\end{center}
+
+###Bag-of-Features with SIFT+HOG
 
 **TODO: Explain BoF with HOG**
 
 **TODO: BoF with HOG, high-/low- classification matrix** 
 
 **TODO: Bof with HOG interpret result**
-
-###SIFT
-
-**TODO: Introduce SIFT** 
-
-###BoF with SIFT
-
-**TODO: Explain BoF with SIFT**
-
-**TODO: BoF with SIFT, high-/low- classification matrix** 
-
-**TODO: Bof with SIFT interpret result**
 
 ###Feature Descriptors + SVM 
 
@@ -225,9 +400,3 @@ grid.arrange(L1_mnist_plt,L2_mnist_plt,ncol=2,
 
 **TODO: HOG + SVM interpret result**
 
-\newpage
-
-##Appendix
- 
-```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
-```
