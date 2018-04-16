@@ -303,7 +303,15 @@ The table above summarizes the performace of the BoF and SIFT models over a rang
 
 **TODO: Explain BoF with HOG**
 
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/BoF_classification.jpg}
+\end{center}
+
 **TODO: BoF with HOG, high-/low- classification matrix** 
+
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/tbl_BoF_sift_HOG.PNG}
+\end{center}
 
 **TODO: Bof with HOG interpret result**
 
