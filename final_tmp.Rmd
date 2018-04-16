@@ -149,78 +149,14 @@ From the MNIST hand writting data set, we selected:
 
 The result from the test data (consist of 100 observations per class):
 
-```{r}
-#source class_heatmap function
-source('./class_heatmap.R')
 
-#load plot data 
-load("./Data/nn_low_res.RData")
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/nn_low_classification.jpg}
+\end{center}
 
-#plot images
-
-L1_mnist_plt = class_heatmap(L1_df)
-L2_mnist_plt = class_heatmap(L2_df)
-grid.arrange(L1_mnist_plt,L2_mnist_plt,ncol=2,
-             top = textGrob("Classification Matrix for Low-Resolution Images",
-                            x = 0, # starts far left
-                            y = 0.5, # experiment with
-                                     # vertical placement
-                            just = "left", # left-aligned,
-                            gp = gpar(fontsize = 16)),
-             bottom = textGrob(  "",
-                                 x = 0, # starts far left
-                                 y = 0.5, # experiment with
-                                     # vertical placement
-                                 just = "left", # left-aligned,
-                                 gp = gpar(fontsize = 10)))
-```
-
-```{r,eval=F}
-#load plot data 
-load("./Result/nn_high_res.RData")
-
-cat = c("ball","car","money","motorbike","person")
-r = rbind(c(32,11,0,7,0),
-          c(10,25,8,0,7),
-          c(26,0,12,8,4),
-          c(18,0,22,9,1),
-          c(8,3,2,27,10))
-
-colnames(r) = cat
-rownames(r) = cat
-tmp_1 = ftable(r)
-class_heatmap_ftable(tmp_1)
-
-L1_h_df = tmp_1
-
-r = cbind(c(28,12,10,0),
-          c(10,32,8,0),
-          c(27,11,10,2),
-          c(12,0,30,8))
-
-
-
-
-
-#plot images
-
-L1_h_plt = class_heatmap_ftable(L1_h_df,"Using L1-norm")
-L2_h_plt = class_heatmap_ftable(L2_h_df,"Using L2-norm")
-grid.arrange(L1_h_plt,L2_h_plt,ncol=2,
-             top = textGrob("Classification Matrix for High-Resolution Images",
-                            x = 0, # starts far left
-                            y = 0.5, # experiment with
-                                     # vertical placement
-                            just = "left", # left-aligned,
-                            gp = gpar(fontsize = 16)),
-             bottom = textGrob(  "",
-                                 x = 0, # starts far left
-                                 y = 0.5, # experiment with
-                                     # vertical placement
-                                 just = "left", # left-aligned,
-                                 gp = gpar(fontsize = 10)))
-```
-
+\begin{center}
+\includegraphics[width=0.9\linewidth]{Image/nn_high_classification.jpg}
+\end{center}
 
 ####L1 vs. L2.
 As we can seen that $L_2-norm$ takes more information from the matrix as it penalizes among all the differences instead of the algorithm for $L_1-norm$ which only takes one of all columns. 
@@ -231,7 +167,7 @@ The main difference between low- and high- resolution images are the information
 **Notes**:
 Worth mentioning that this algorithm requires *ALL* images from train and test set to be consistant in width and height, ortherwise it will fail becasue the nature of the algorithm involves matrix element-wise substraction and hence calculate matrix-norm.
 
-##Introducing Feature Descriptors
+##Feature Descriptors
 
 
 Feature descriptors are algorithms motivated by recent works in computer vision and image processing that take an image and output a set of numerical feature vectors that encode *interesting* information from the image. This set of numerical feature vectors can be used to define a unique "fingerprint" for any given image. Recent works have uncovered ways of extracting information from images that is invariant under image transforamtions; this means that the same set of features are identified from an image if it is tranformed in ways such as scale, rotation, shift etc. 
@@ -298,26 +234,6 @@ To classify a test image $x$, we first compute HOG features $h$ of $x$. Then for
 
 As seen in the classification matrices above, the PCA of HOG method is able to achieve an impressive 89.2% classification accuracy for low-resolution images. However this method does not fare as well in classifying high-resolution images; it is only able to achieve 68% classification accuracy for high-resolution images.  
 
-```{r fig.height=8, fig.width=4,eval=F}
-load("./Result/hog_pca_ftable.RData")
-
-hog_pca_l_plt = class_heatmap_ftable(low_res_hog_pca,"Low-resolution images")
-hog_pca_h_plt = class_heatmap_ftable(high_res_hog_pca,"High-resolution images")
-
-grid.arrange(hog_pca_l_plt,hog_pca_h_plt,ncol=1,
-             top = textGrob("Heatmap of classification matrix",
-                            x = 0, # starts far left
-                            y = 0.5, # experiment with
-                                     # vertical placement
-                            just = "left", # left-aligned,
-                            gp = gpar(fontsize = 16)),
-             bottom = textGrob(  "",
-                                 x = 0, # starts far left
-                                 y = 0.5, # experiment with
-                                     # vertical placement
-                                 just = "left", # left-aligned,
-                                 gp = gpar(fontsize = 10)))
-```
 
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Image/tbl_hog_pca.PNG}
@@ -363,24 +279,25 @@ Scale-Invariant Feature Transform (SIFT) as a computer vision algorithm that was
 
 The features highlighted by SIFT are computed by finding the local minimums and maximums of the difference of gaussians at various scales. The direction of local gradient, computed with respect to neighboring pixels in Gaussian-blurred image, is used to assign one or more dominant orientation to each feature. 
 
-SIFT is a popular feature detection and description algorithm, and we propose using it in the first step of the bag-of-features model. Next, for the clustering step to construct the visual vocabulary using the SIFT identified features, we suggest K-means for its simplicity. Finally, for the multi-class classification of image feature vectors, we employ SVM with the radial basis function kernel. 
-
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Image/sift_demo.jpg}
 \end{center}
 
-The classification matrices below show that the combination of a BoF and SIFT is able to achieve an impressive 92% classification accuracy for high-resolution images. However, this model does not fare well in classifying low-resolution images; it is only able to achive 63% classification accuracy for low-resolution images.
+SIFT is a popular feature detection and description algorithm, and we propose using it in the first step of the bag-of-features model. Next, for the clustering step to construct the visual vocabulary using the SIFT identified features, we suggest K-means for its simplicity. Finally, for the multi-class classification of image feature vectors, we employ SVM with the radial basis function kernel. 
 
 \begin{center}
 \includegraphics[width=\linewidth]{Image/sift_classification.jpg}
 \end{center}
 
-The table below summarizes the performace of the BoF and SIFT models over a range of visual vocabulary sizes. The classification accuracy of this model increases as the vocabulary sizes increases. However, these gains only contiue up to a certain point, after which the model's performance stabilizes. Also, previously we mentioned the 42 millisecond classification-time threshold for real-time streaming video classification. As seen below, with a few technical refinements, the Bof and SIFT model should be able to classify high-resolution video in real-time. 
-
+The classification matrices above show that the combination of a BoF and SIFT is able to achieve an impressive 92% classification accuracy for high-resolution images. However, this model does not fare well in classifying low-resolution images; it is only able to achive 63% classification accuracy for low-resolution images.
 
 \begin{center}
 \includegraphics[width=0.9\linewidth]{Image/tbl_sift.PNG}
 \end{center}
+
+The table above summarizes the performace of the BoF and SIFT models over a range of visual vocabulary sizes. The classification accuracy of this model increases as the vocabulary sizes increases. However, these gains only contiue up to a certain point, after which the model's performance stabilizes. Also, previously we mentioned the 42 millisecond classification-time threshold for real-time streaming video classification. As seen above, with a few technical refinements, the Bof and SIFT model should be able to classify high-resolution video in real-time. 
+
+
 
 ###Bag-of-Features with SIFT+HOG
 
