@@ -8,8 +8,11 @@ from matplotlib import pyplot as plt
 from sklearn.decomposition import PCA
 from sklearn import preprocessing
 from sklearn.metrics import confusion_matrix
+import time
 
-HOG_PCA_COMPONENTS = 100
+
+
+HOG_PCA_COMPONENTS = 10  # only used for HOG+PCA
 TEST_IMAGE_LIMIT = 50
 TRAIN_IMAGE_LIMIT = 100
 VOCAB_SIZE = 200
@@ -46,7 +49,7 @@ class BOV:
         # read file. prepare file lists.
         self.images, self.trainImageCount = self.file_helper.getFiles(
             self.train_path, limit=TRAIN_IMAGE_LIMIT)
-        #self.images, self.trainImageCount = mnist.get_data("training", 1000)
+        #self.images, self.trainImageCount = mnist.get_data("training", TRAIN_IMAGE_LIMIT)
         # extract SIFT Features from each image
         label_count = 0
         for word, imlist in self.images.items():
@@ -57,6 +60,7 @@ class BOV:
                 # cv2.waitKey()
                 self.train_labels = np.append(self.train_labels, label_count)
                 kp, des = self.im_helper.features(im)
+                if des is None: continue
                 self.descriptor_list.append(des)
                 if word in class_hog_vectors:
                     class_hog_vectors[word].append(des.tolist())
@@ -84,13 +88,14 @@ class BOV:
         #####################
         # Bag of Features
         #####################
+
         # perform k-means clustering
         bov_descriptor_stack = self.bov_helper.formatND(self.descriptor_list)
         self.bov_helper.cluster()
         self.bov_helper.developVocabulary(n_images=self.trainImageCount,
                                           descriptor_list=self.descriptor_list)
         # show vocabulary trained
-        self.bov_helper.plotHist()
+        # self.bov_helper.plotHist()
         self.bov_helper.standardize()
         self.bov_helper.train(self.train_labels)
 
@@ -153,6 +158,7 @@ class BOV:
         # the visual word (feature) present in the image
 
         # test_ret =<> return of kmeans nearest clusters for N features
+        if len(des) == 0: return ["Error"]
         test_ret = self.bov_helper.kmeans_obj.predict(des)
         # print test_ret
 
@@ -180,7 +186,7 @@ class BOV:
 
         self.testImages, self.testImageCount = self.file_helper.getFiles(
             self.test_path, limit=TEST_IMAGE_LIMIT)
-        #self.testImages, self.testImageCount = mnist.get_data("testing", 100)
+        #self.testImages, self.testImageCount = mnist.get_data("testing", TEST_IMAGE_LIMIT)
 
         predictions = []
         true_values = []
@@ -193,7 +199,7 @@ class BOV:
                 #print(im.shape)
                 cl = self.recognize(im)
                 if cl[0] == "Error":
-                    print("Could not classify ", word, im)
+                    # print("Could not classify ", word, im)
                     continue
                 #print(cl)
                 predictions.append({
@@ -223,8 +229,10 @@ class BOV:
         print("Correct classifications", correct_classifications)
         print("Incorrect classifications", incorrect_classifications)
         print("Err pct", incorrect_classifications/(correct_classifications + incorrect_classifications))
-        print(self.name_dict)
-        print(confusion_matrix(true_values, y_preds, labels=['ball', 'car', 'money', 'motorbike', 'person']))
+        # print(self.name_dict)
+        #LABELS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        LABELS = ['ball', 'car', 'money', 'motorbike', 'person']
+        print(confusion_matrix(true_values, y_preds, labels=LABELS))
 
 
     def print_vars(self):
@@ -251,6 +259,10 @@ if __name__ == '__main__':
     # set testing paths
     bov.test_path = args['test_path']
     # train the model
+    start = time.time()
     bov.trainModel()
+    print("Train Time", time.time()-start)
     # test model
+    start = time.time()
     bov.testModel()
+    print("Test Time", time.time() - start)

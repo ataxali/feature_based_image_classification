@@ -10,13 +10,10 @@ from skimage import data, exposure
 import time
 
 
-
-
-
 class ImageHelpers:
     def __init__(self):
         self.sift_object = cv2.xfeatures2d.SIFT_create(nfeatures=100)
-        #self.sift_object = cv2.xfeatures2d.SIFT_create(nfeatures=30)
+        #self.sift_object = cv2.xfeatures2d.SIFT_create(nfeatures=100)
         #self.sift_object = cv2.xfeatures2d.SIFT_create(nfeatures=10, sigma=1, edgeThreshold=100)
 
     def gray(self, image):
@@ -30,27 +27,33 @@ class ImageHelpers:
         keypoints, descriptors = self.sift_object.detectAndCompute(image, None)
         #new_img = cv2.drawKeypoints(image, keypoints, None,
         #                        flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
-        # cv2.imwrite('sift_keypoints.jpg', new_img)
+        #cv2.imwrite('sift_keypoints.jpg', new_img)
+
+
+        ####################
+        # HOG
+        ####################
 
         key_points = np.zeros((image.shape[0], image.shape[1]))
         for keypoint in keypoints:
             kp_center = (int(round(keypoint.pt[0])), int(round(keypoint.pt[1])))
-            kp_radius = int(round(keypoint.size))
+            kp_radius = np.maximum(4, int(round(keypoint.size/2)))
             for i in range(kp_center[1]-kp_radius, kp_center[1]+kp_radius):
-                y_cord = np.minimum(i, image.shape[1]-1)
+                y_cord = np.minimum(i, image.shape[0]-1)
                 x_lo_cord = np.maximum(kp_center[0] - kp_radius, 0)
                 x_hi_cord = np.minimum(kp_center[0] + kp_radius, image.shape[0]-1)
                 key_points[y_cord, x_lo_cord:x_hi_cord] = \
                     image[y_cord, x_lo_cord:x_hi_cord]
         # cv2.imwrite("keypoints_only.jpg", key_points)
-
-        ####################
-        # HOG
-        ####################
-        descriptors, hog_img = hog(key_points, orientations=8, pixels_per_cell=(12, 12),
+        
+        # key_points = image
+        HOG_RES_LO = (4, 4)
+        HOG_RES_HI = (12, 12)
+        descriptors, hog_img = hog(key_points, orientations=8, pixels_per_cell=HOG_RES_HI,
                                    cells_per_block=(2, 2),
                                    visualise=True, block_norm='L2')
 
+        '''
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(8, 4),
                                        sharex=True,
                                        sharey=True)
@@ -69,17 +72,17 @@ class ImageHelpers:
         ax3.imshow(hog_image_rescaled, cmap=plt.cm.gray)
         ax3.set_title('Histogram of Oriented Gradients')
         plt.show()
+        '''
 
         descriptors = np.array(descriptors)
         descriptors[descriptors >= 0.99] = 0
         non_zero_descriptors = np.nonzero(descriptors)
         non_zero_descriptors = np.dstack((non_zero_descriptors, descriptors[non_zero_descriptors]))
         non_zero_descriptors = np.squeeze(non_zero_descriptors, axis=0)
-
         descriptors = non_zero_descriptors
-        # descriptors = descriptors[np.nonzero(descriptors)]
+
         keypoints = descriptors.shape[0]
-        # descriptors = np.resize(descriptors, (keypoints, 1))
+
 
         return [keypoints, descriptors]
 
@@ -120,6 +123,7 @@ class BOVHelpers:
             [np.zeros(self.n_clusters) for i in range(n_images)])
         old_count = 0
         for i in range(n_images):
+            if i >= len(descriptor_list): break
             if descriptor_list[i] is None:
                 l = 0
             else:
@@ -178,7 +182,7 @@ class BOVHelpers:
         """
         print("Training SVM")
         print(self.clf)
-        print("Train labels", train_labels)
+        # print("Train labels", train_labels)
         self.clf.fit(self.mega_histogram, train_labels)
         print("Training completed")
 
